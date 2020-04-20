@@ -24,11 +24,11 @@ environment:
 
     - ARCH: x86
       COMPILER: MinGW
-      QTDIR: C:\Qt\5.14.1\mingw73_32
+      QTDIR: C:\Qt\5.14.2\mingw73_32
 
     - ARCH: x64
       COMPILER: MinGW
-      QTDIR: C:\Qt\5.14.1\mingw73_64
+      QTDIR: C:\Qt\5.14.2\mingw73_64
 
     - ARCH: x86
       COMPILER: VS2019
@@ -115,7 +115,15 @@ for:
 
     build_script:
       # Build MMapper within a Docker container using the current working path as a volume
-      - sh: docker run --rm -v "$(pwd)":/root/mmapper $DOCKER_IMAGE bash -c "apt update && apt upgrade -y && apt install -y build-essential git qt5-qmake libqt5opengl5-dev zlib1g-dev libssl-dev cmake libminiupnpc-dev && cd /root/mmapper && mkdir build && cd build && cmake .. -DTARGET_ARCHITECTURE=$TARGET_ARCHITECTURE -DUSE_COTIRE=true && make -j$(getconf _NPROCESSORS_ONLN) && QT_QPA_PLATFORM=offscreen ctest -V && cpack"
+      - sh: docker run --rm -v "$(pwd)":/root/mmapper $DOCKER_IMAGE bash -c "apt update && apt upgrade -y && apt install -y build-essential git qt5-qmake libqt5opengl5-dev zlib1g-dev libssl-dev cmake libminiupnpc-dev && cd /root/mmapper && mkdir build && cd build && cmake .. -DTARGET_ARCHITECTURE=$TARGET_ARCHITECTURE -DUSE_COTIRE=true && make -j$(getconf _NPROCESSORS_ONLN) && QT_QPA_PLATFORM=offscreen ctest -V --no-compress-output -T test && cpack"
+
+    test_script:
+      # Transform test results from ctest to junit format
+      - ps: $XSLInputElement = New-Object System.Xml.Xsl.XslCompiledTransform
+      - ps: $XSLInputElement.Load("https://raw.githubusercontent.com/rpavlik/jenkins-ctest-plugin/master/ctest-to-junit.xsl")
+      - ps: $XSLInputElement.Transform((Resolve-Path .\build\Testing\*\Test.xml), (Join-Path (Resolve-Path .) "ctest-to-junit-results.xml"))
+      - ps: $wc = New-Object 'System.Net.WebClient'
+      - ps: $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\ctest-to-junit-results.xml))
 
     artifacts:
       - path: build\mmapper-*-Linux-*.deb
@@ -153,8 +161,9 @@ for:
 
     before_build:
       - cmd: set PATH=%QTDIR%\bin;C:\Qt\Tools\QtCreator\bin;%PATH%
-      - cmd: chocolatey install -y nasm
-      - cmd: set PATH=%PROGRAMFILES%\nasm;%PATH%
+      # Install NASM to compile OpenSSL using MSVC
+      #- cmd: chocolatey install -y nasm
+      #- cmd: set PATH=%PROGRAMFILES%\nasm;%PATH%
       - cmd: echo PATH=%PATH%
 
     build_script:
@@ -166,7 +175,13 @@ for:
       - cmd: cpack
 
     test_script:
-      - cmd: ctest -V
+      - cmd: ctest -V --no-compress-output -T Test
+      # Transform test results from ctest to junit format
+      - ps: $XSLInputElement = New-Object System.Xml.Xsl.XslCompiledTransform
+      - ps: $XSLInputElement.Load("https://raw.githubusercontent.com/rpavlik/jenkins-ctest-plugin/master/ctest-to-junit.xsl")
+      - ps: $XSLInputElement.Transform((Resolve-Path .\Testing\*\Test.xml), (Join-Path (Resolve-Path .) "ctest-to-junit-results.xml"))
+      - ps: $wc = New-Object 'System.Net.WebClient'
+      - ps: $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\ctest-to-junit-results.xml))
 
     artifacts:
       - path: winbuild\mmapper-*-Windows-*.exe
@@ -204,9 +219,9 @@ for:
       - cmd: if %COMPILER%==MinGW if %ARCH%==x64 pacman -Sy --noconfirm --noprogressbar --needed mingw-w64-x86_64-toolchain mingw-w64-x86_64-miniupnpc
       # Install Qt
       - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/build-images/master/scripts/Windows/install_qt_module.ps1'))
-      - ps: if ($env:ARCH -eq 'x86') { Install-QtComponent -Version '5.14.1' -Name 'win32_mingw73' -ExcludeDocs -ExcludeExamples }
-      - ps: if ($env:ARCH -eq 'x64') { Install-QtComponent -Version '5.14.1' -Name 'win64_mingw73' -ExcludeDocs -ExcludeExamples }
-      - ps: ConfigureQtVersion 'C:\Qt' '5.14.1'
+      - ps: if ($env:ARCH -eq 'x86') { Install-QtComponent -Version '5.14.2' -Name 'win32_mingw73' -ExcludeDocs -ExcludeExamples }
+      - ps: if ($env:ARCH -eq 'x64') { Install-QtComponent -Version '5.14.2' -Name 'win64_mingw73' -ExcludeDocs -ExcludeExamples }
+      - ps: ConfigureQtVersion 'C:\Qt' '5.14.2'
 
         before_build:
       - cmd: if %COMPILER%==MinGW if %ARCH%==x86 set "PATH=C:/msys64/mingw32/bin;%PATH%"
@@ -224,7 +239,13 @@ for:
       - cmd: cpack
 
     test_script:
-      - cmd: ctest -V
+      - cmd: ctest -V --no-compress-output -T test
+      # Transform test results from ctest to junit format
+      - ps: $XSLInputElement = New-Object System.Xml.Xsl.XslCompiledTransform
+      - ps: $XSLInputElement.Load("https://raw.githubusercontent.com/rpavlik/jenkins-ctest-plugin/master/ctest-to-junit.xsl")
+      - ps: $XSLInputElement.Transform((Resolve-Path .\Testing\*\Test.xml), (Join-Path (Resolve-Path .) "ctest-to-junit-results.xml"))
+      - ps: $wc = New-Object 'System.Net.WebClient'
+      - ps: $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\ctest-to-junit-results.xml))
 
     artifacts:
       - path: winbuild\mmapper-*-Windows-*.exe
@@ -263,7 +284,13 @@ for:
       - cpack
 
     test_script:
-      - ctest -V
+      - ctest -V --no-compress-output -T test
+      # Transform test results from ctest to junit format
+      - ps: $XSLInputElement = New-Object System.Xml.Xsl.XslCompiledTransform
+      - ps: $XSLInputElement.Load("https://raw.githubusercontent.com/rpavlik/jenkins-ctest-plugin/master/ctest-to-junit.xsl")
+      - ps: $XSLInputElement.Transform((Resolve-Path .\Testing\*\Test.xml), (Join-Path (Resolve-Path .) "ctest-to-junit-results.xml"))
+      - ps: $wc = New-Object 'System.Net.WebClient'
+      - ps: $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\ctest-to-junit-results.xml))
 
     artifacts:
       - path: build\mmapper-*-Mac-*.dmg

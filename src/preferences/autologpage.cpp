@@ -50,7 +50,7 @@ void AutoLogPage::loadConfig()
     const auto &config = getConfig().autoLog;
     ui->autoLogCheckBox->setChecked(config.autoLog);
     ui->autoLogLocation->setText(config.autoLogDirectory);
-    ui->autoLogMaxBytes->setValue(config.autoLogMaxBytes/1000000);
+    ui->autoLogMaxBytes->setValue(config.autoLogMaxBytes / 1000000);
     ui->notifyWhenLogsReachSize->setValue(config.notifyWhenLogsReachSize);
     ui->notifyWhenLogsReachCheckBox->setChecked(config.notifyWhenLogsReach);
 }
@@ -75,7 +75,8 @@ void AutoLogPage::autoLogCheckBoxChanged(int /*unused*/)
 
 void AutoLogPage::maxLogBytesChanged(int /*unused*/)
 {
-    setConfig().autoLog.autoLogMaxBytes = ui->autoLogMaxBytes->value() * 1000000; // Convert megabytes to bytes.
+    setConfig().autoLog.autoLogMaxBytes = ui->autoLogMaxBytes->value()
+                                          * 1000000; // Convert megabytes to bytes.
 }
 
 void AutoLogPage::notifyWhenLogsReachCheckBoxChanged(int /*unused*/)

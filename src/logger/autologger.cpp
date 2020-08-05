@@ -75,7 +75,7 @@ void AutoLogger::deleteOldLogs()
     QList<QFileInfo> filesToDelete;
 
     const auto &fileInfoList = QDir(conf.autoLogDirectory)
-            .entryInfoList(QStringList("MMapper_Log_*.txt"), QDir::Files);
+                                   .entryInfoList(QStringList("MMapper_Log_*.txt"), QDir::Files);
 
     if (fileInfoList.count() == 0)
         return;
@@ -85,14 +85,14 @@ void AutoLogger::deleteOldLogs()
         if (fileInfo.created().date().daysTo(today) >= deleteLogsOlderThan) {
             filesToDelete.append(fileInfo);
             totalLogsSize += fileInfo.size();
-
         }
     }
 
     if (conf.notifyWhenLogsReach && totalLogsSize > conf.notifyWhenLogsReachSize) {
-        long totalLogsSizeKb  = totalLogsSize / 1000;
-        bool result = showDeleteDialog("We found " + QString::number(totalLogsSizeKb) +
-                                       "kB of logs older than 30 days, do you want to delete them?");
+        long totalLogsSizeKb = totalLogsSize / 1000;
+        bool result = showDeleteDialog(
+            "We found " + QString::number(totalLogsSizeKb)
+            + "kB of logs older than 30 days, do you want to delete them?");
         if (!result)
             return;
     } else {
@@ -100,8 +100,7 @@ void AutoLogger::deleteOldLogs()
     }
 
     bool result = showDeleteDialog("MMapper will delete all logs older than 30 days, are you sure?");
-    if (result)
-    {
+    if (result) {
         QFileInfoList fileList(filesToDelete);
         deleteLogs(fileList);
     }
@@ -133,8 +132,8 @@ bool AutoLogger::showDeleteDialog(QString message)
 QString AutoLogger::generateLogPrefix()
 {
     return QString("MMapper_Log_%1_%2")
-            .arg(QDate::currentDate().toString("yyyy_MM_dd"))
-            .arg(QString::number(QDateTime::currentDateTimeUtc().toTime_t()));
+        .arg(QDate::currentDate().toString("yyyy_MM_dd"))
+        .arg(QString::number(QDateTime::currentDateTimeUtc().toTime_t()));
 }
 
 void AutoLogger::writeToLog(const QByteArray &ba)

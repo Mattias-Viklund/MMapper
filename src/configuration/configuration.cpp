@@ -112,7 +112,8 @@ void Settings::initSettings()
     static auto g_path = qgetenv(MMAPPER_PROFILE_PATH);
 
     if (g_path != nullptr) {
-        // NOTE: QMessageLogger quotes QString by default, but doesn't quote const char*.
+        // NOTE: QMessageLogger quotes QString by default, but doesn't quote const
+        // char*.
         const QString pathString{g_path};
 
         static std::once_flag attempt_flag;
@@ -160,7 +161,8 @@ void Settings::initSettings()
 // * Avoiding using global QSettings& getSettings() because the QSettings object
 //   maintains some state, so it's better to construct a new one each time.
 //
-// * Declaring an object via macro instead of just calling a function is necessary
+// * Declaring an object via macro instead of just calling a function is
+// necessary
 //   because we have two object construction paths, and we attempt to access the
 //   value after its construction, so we can't use RVO to avoid copy/move
 //   construction of the QSettings object.
@@ -488,16 +490,16 @@ void Configuration::GeneralSettings::read(QSettings &conf)
 {
     firstRun = conf.value(KEY_RUN_FIRST_TIME, true).toBool();
     /*
-     * REVISIT: It's basically impossible to verify that this state is valid,
-     * because we have no idea what it contains!
-     *
-     * This setting is inherently non-portable between OSes
-     * (and possibly even window managers), so it doesn't belong here!
-     *
-     * If we're going to save it, then we should probably least checksum it
-     * (or better yet sign it), and record the OS config, so that we won't
-     * try to apply Windows settings to Mac, or Gnome settings to KDE, etc?
-     */
+   * REVISIT: It's basically impossible to verify that this state is valid,
+   * because we have no idea what it contains!
+   *
+   * This setting is inherently non-portable between OSes
+   * (and possibly even window managers), so it doesn't belong here!
+   *
+   * If we're going to save it, then we should probably least checksum it
+   * (or better yet sign it), and record the OS config, so that we won't
+   * try to apply Windows settings to Mac, or Gnome settings to KDE, etc?
+   */
     windowGeometry = conf.value(KEY_WINDOW_GEOMETRY).toByteArray();
     windowState = conf.value(KEY_WINDOW_STATE).toByteArray();
     alwaysOnTop = conf.value(KEY_ALWAYS_ON_TOP, false).toBool();
@@ -589,7 +591,7 @@ void Configuration::AutoLogSettings::read(QSettings &conf)
                                       .append(DEFAULT_LOGS_SUBDIR))
                            .toString();
     autoLog = conf.value(KEY_AUTO_LOG, false).toBool();
-    autoLogMaxBytes = conf.value(KEY_AUTO_LOG_MAX_BYTES, 10*1000000).toInt(); // 10 Megabytes
+    autoLogMaxBytes = conf.value(KEY_AUTO_LOG_MAX_BYTES, 10 * 1000000).toInt(); // 10 Megabytes
     notifyWhenLogsReach = conf.value(KEY_NOTIFY_WHEN_LOGS_REACH, true).toBool();
     notifyWhenLogsReachSize = conf.value(KEY_NOTIFY_WHEN_LOGS_REACH_SIZE, 100).toInt();
 }

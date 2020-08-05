@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-or-later
+﻿// SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (C) 2019 The MMapper Authors
 // Author: Mattias Viklund <devmew@exedump.com> (Mew_)
 
@@ -35,7 +35,7 @@ bool AutoLogger::createFile()
     if (!m_logFile.is_open()) // Could not create file.
         return false;
 
-    m_curLines = 0;
+    m_curBytes = 0;
     m_curFile++;
 
     return true;
@@ -50,7 +50,7 @@ bool AutoLogger::writeLine(const QByteArray &ba)
         if (!createFile())
             return false; // Could not create the log file.
 
-    } else if (m_curLines > getConfig().autoLog.autoLogMaxLines) {
+    } else if (m_curBytes > getConfig().autoLog.autoLogMaxBytes) {
         m_logFile.close();
         if (!createFile())
             return false;
@@ -61,7 +61,7 @@ bool AutoLogger::writeLine(const QByteArray &ba)
 
     m_logFile << str.toStdString();
     m_logFile.flush();
-    m_curLines++;
+    m_curBytes++;
 
     return true;
 }
@@ -71,30 +71,40 @@ void AutoLogger::deleteOldLogs()
     auto &conf = getConfig().autoLog;
 
     const QDate today = QDate::currentDate();
-    QList<QFileInfo> files;
+
+    QList<QFileInfo> filesToDelete;
+
     const auto &fileInfoList = QDir(conf.autoLogDirectory)
-                                   .entryInfoList(QStringList("MMapper_Log_*.txt"), QDir::Files);
+            .entryInfoList(QStringList("MMapper_Log_*.txt"), QDir::Files);
+
+    if (fileInfoList.count() == 0)
+        return;
+
+    long totalLogsSize = 0;
     for (const auto &fileInfo : fileInfoList) {
-        if (fileInfo.created().date().daysTo(today) >= conf.deleteLogsOlderThan) {
-            files.append(fileInfo);
+        if (fileInfo.created().date().daysTo(today) >= deleteLogsOlderThan) {
+            filesToDelete.append(fileInfo);
+            totalLogsSize += fileInfo.size();
+
         }
     }
 
-    if (conf.warnWhenDeleting && files.length() > conf.warnWhenMoreThan) {
-        QMessageBox msgBox;
-        msgBox.setText("There are more than " + QString::number(conf.warnWhenMoreThan)
-                       + " logs to be deleted.");
-        msgBox.setInformativeText("Continue?");
-        msgBox.setWindowTitle("MMapper Warning");
-        msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
-        msgBox.setDefaultButton(QMessageBox::Yes);
-
-        int ret = msgBox.exec();
-        if (ret == QMessageBox::No)
+    if (conf.notifyWhenLogsReach && totalLogsSize > conf.notifyWhenLogsReachSize) {
+        long totalLogsSizeKb  = totalLogsSize / 1000;
+        bool result = showDeleteDialog("We found " + QString::number(totalLogsSizeKb) +
+                                       "kB of logs older than 30 days, do you want to delete them?");
+        if (!result)
             return;
+    } else {
+        return;
     }
-    QFileInfoList fileList(files);
-    deleteLogs(fileList);
+
+    bool result = showDeleteDialog("MMapper will delete all logs older than 30 days, are you sure?");
+    if (result)
+    {
+        QFileInfoList fileList(filesToDelete);
+        deleteLogs(fileList);
+    }
 }
 
 void AutoLogger::deleteLogs(const QFileInfoList &files)
@@ -108,11 +118,23 @@ void AutoLogger::deleteLogs(const QFileInfoList &files)
     }
 }
 
+bool AutoLogger::showDeleteDialog(QString message)
+{
+    QMessageBox msgBox;
+    msgBox.setText(message);
+    msgBox.setWindowTitle("MMapper Notification");
+    msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+    msgBox.setDefaultButton(QMessageBox::Yes);
+
+    int result = msgBox.exec();
+    return result == QMessageBox::Yes;
+}
+
 QString AutoLogger::generateLogPrefix()
 {
     return QString("MMapper_Log_%1_%2")
-        .arg(QDate::currentDate().toString("yyyy_MM_dd"))
-        .arg(QString::number(QDateTime::currentDateTimeUtc().toTime_t()));
+            .arg(QDate::currentDate().toString("yyyy_MM_dd"))
+            .arg(QString::number(QDateTime::currentDateTimeUtc().toTime_t()));
 }
 
 void AutoLogger::writeToLog(const QByteArray &ba)
@@ -127,7 +149,7 @@ void AutoLogger::shouldLog(bool echo)
 
 void AutoLogger::onConnected()
 {
-    if (getConfig().autoLog.deleteOldLogs)
+    if (getConfig().autoLog.notifyWhenLogsReach)
         deleteOldLogs();
 
     if (getConfig().autoLog.autoLog)

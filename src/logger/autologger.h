@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (C) 2019 The MMapper Authors
 // Author: Mattias Viklund <devmew@exedump.com> (Mew_)
@@ -21,9 +21,12 @@ public slots:
     void onConnected();
 
 private:
+    const int deleteLogsOlderThan = 30;
+
     bool writeLine(const QByteArray &ba);
     void deleteOldLogs();
     void deleteLogs(const QFileInfoList &files);
+    bool showDeleteDialog(QString message);
 
     bool createFile();
     QString generateLogPrefix();
@@ -31,7 +34,7 @@ private:
 private:
     QString m_logPrefix;
     std::fstream m_logFile;
-    int m_curLines = 0;
+    int m_curBytes = 0;
     int m_curFile = 0;
     bool m_shouldLog = true;
 };

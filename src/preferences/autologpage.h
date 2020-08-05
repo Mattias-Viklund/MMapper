@@ -23,11 +23,9 @@ public slots:
 
     void selectLogLocationButtonClicked(int);
     void autoLogCheckBoxChanged(int);
-    void maxLogLinesChanged(int);
-    void deleteOldLogsCheckBoxChanged(int);
-    void deleteLogsOlderThanChanged(int);
-    void warnWhenDeletingCheckBoxChanged(int);
-    void warnWhenMoreThanChanged(int);
+    void maxLogBytesChanged(int);
+    void notifyWhenLogsReachCheckBoxChanged(int);
+    void notifyWhenLogsReachSizeChanged(int);
 
 signals:
 

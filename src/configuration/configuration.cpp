@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-or-later
+﻿// SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (C) 2019 The MMapper Authors
 // Author: Ulf Hermann <ulfonk_mennhar@gmx.de> (Alve)
 // Author: Marek Krejza <krejza@gmail.com> (Caligor)
@@ -217,11 +217,9 @@ ConstString KEY_EXTERNAL_EDITOR_COMMAND = "External editor command";
 ConstString KEY_FILE_NAME = "File name";
 ConstString KEY_AUTO_LOG = "Auto log";
 ConstString KEY_AUTO_LOG_DIRECTORY = "Auto log directory";
-ConstString KEY_AUTO_LOG_MAX_LINES = "Auto log max lines";
-ConstString KEY_DELETE_OLD_LOGS = "Delete old logs";
-ConstString KEY_DELETE_LOGS_OLDER_THAN = "Delete logs older than";
-ConstString KEY_WARN_WHEN_DELETING = "Warn when deleting";
-ConstString KEY_WARN_WHEN_MORE_THAN = "Warn when more than";
+ConstString KEY_AUTO_LOG_MAX_BYTES = "Auto log max bytes";
+ConstString KEY_NOTIFY_WHEN_LOGS_REACH = "Notify when logs reach";
+ConstString KEY_NOTIFY_WHEN_LOGS_REACH_SIZE = "Notify when logs reach size";
 ConstString KEY_FONT = "Font";
 ConstString KEY_FOREGROUND_COLOR = "Foreground color";
 ConstString KEY_3D_CANVAS = "canvas.advanced.use3D";
@@ -591,11 +589,9 @@ void Configuration::AutoLogSettings::read(QSettings &conf)
                                       .append(DEFAULT_LOGS_SUBDIR))
                            .toString();
     autoLog = conf.value(KEY_AUTO_LOG, false).toBool();
-    autoLogMaxLines = conf.value(KEY_AUTO_LOG_MAX_LINES, 10000000).toInt();
-    deleteOldLogs = conf.value(KEY_DELETE_OLD_LOGS, true).toBool();
-    deleteLogsOlderThan = conf.value(KEY_DELETE_LOGS_OLDER_THAN, 60).toInt();
-    warnWhenDeleting = conf.value(KEY_WARN_WHEN_DELETING, true).toBool();
-    warnWhenMoreThan = conf.value(KEY_WARN_WHEN_MORE_THAN, 20).toInt();
+    autoLogMaxBytes = conf.value(KEY_AUTO_LOG_MAX_BYTES, 10*1000000).toInt(); // 10 Megabytes
+    notifyWhenLogsReach = conf.value(KEY_NOTIFY_WHEN_LOGS_REACH, true).toBool();
+    notifyWhenLogsReachSize = conf.value(KEY_NOTIFY_WHEN_LOGS_REACH_SIZE, 100).toInt();
 }
 
 void Configuration::ParserSettings::read(QSettings &conf)
@@ -769,11 +765,9 @@ void Configuration::AutoLogSettings::write(QSettings &conf) const
 {
     conf.setValue(KEY_AUTO_LOG, autoLog);
     conf.setValue(KEY_AUTO_LOG_DIRECTORY, autoLogDirectory);
-    conf.setValue(KEY_AUTO_LOG_MAX_LINES, autoLogMaxLines);
-    conf.setValue(KEY_DELETE_LOGS_OLDER_THAN, deleteLogsOlderThan);
-    conf.setValue(KEY_DELETE_OLD_LOGS, deleteOldLogs);
-    conf.setValue(KEY_WARN_WHEN_DELETING, warnWhenDeleting);
-    conf.setValue(KEY_WARN_WHEN_MORE_THAN, warnWhenMoreThan);
+    conf.setValue(KEY_AUTO_LOG_MAX_BYTES, autoLogMaxBytes);
+    conf.setValue(KEY_NOTIFY_WHEN_LOGS_REACH, notifyWhenLogsReach);
+    conf.setValue(KEY_NOTIFY_WHEN_LOGS_REACH_SIZE, notifyWhenLogsReachSize);
 }
 
 void Configuration::ParserSettings::write(QSettings &conf) const

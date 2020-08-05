@@ -262,11 +262,9 @@ public:
     {
         QString autoLogDirectory;
         bool autoLog = false;
-        bool deleteOldLogs = true;
-        bool warnWhenDeleting = true;
-        int autoLogMaxLines = 0;
-        int warnWhenMoreThan = 20;
-        int deleteLogsOlderThan = 0;
+        bool notifyWhenLogsReach = false;
+        int autoLogMaxBytes = 0;
+        int notifyWhenLogsReachSize = 0;
 
     private:
         SUBGROUP();

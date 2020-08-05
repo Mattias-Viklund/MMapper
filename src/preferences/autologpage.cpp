@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-or-later
+﻿// SPDX-License-Identifier: GPL-2.0-or-later
 // Copyright (C) 2019 The MMapper Authors
 // Author: Mattias Viklund <devmew@exedump.com> (Mew_)
 
@@ -26,26 +26,18 @@ AutoLogPage::AutoLogPage(QWidget *const parent)
             &QAbstractButton::clicked,
             this,
             &AutoLogPage::selectLogLocationButtonClicked);
-    connect(ui->autoLogMaxLines,
+    connect(ui->autoLogMaxBytes,
             QOverload<int>::of(&QSpinBox::valueChanged),
             this,
-            &AutoLogPage::maxLogLinesChanged);
-    connect(ui->deleteOldLogsCheckbox,
+            &AutoLogPage::maxLogBytesChanged);
+    connect(ui->notifyWhenLogsReachCheckBox,
             QOverload<int>::of(&QCheckBox::stateChanged),
             this,
-            &AutoLogPage::deleteOldLogsCheckBoxChanged);
-    connect(ui->deleteLogsOlderThan,
+            &AutoLogPage::notifyWhenLogsReachCheckBoxChanged);
+    connect(ui->notifyWhenLogsReachSize,
             QOverload<int>::of(&QSpinBox::valueChanged),
             this,
-            &AutoLogPage::deleteLogsOlderThanChanged);
-    connect(ui->warnWhenDeletingCheckBox,
-            &QCheckBox::stateChanged,
-            this,
-            &AutoLogPage::warnWhenDeletingCheckBoxChanged);
-    connect(ui->warnWhenMoreThan,
-            QOverload<int>::of(&QSpinBox::valueChanged),
-            this,
-            &AutoLogPage::warnWhenMoreThanChanged);
+            &AutoLogPage::notifyWhenLogsReachSizeChanged);
 }
 
 AutoLogPage::~AutoLogPage()
@@ -58,11 +50,9 @@ void AutoLogPage::loadConfig()
     const auto &config = getConfig().autoLog;
     ui->autoLogCheckBox->setChecked(config.autoLog);
     ui->autoLogLocation->setText(config.autoLogDirectory);
-    ui->autoLogMaxLines->setValue(config.autoLogMaxLines);
-    ui->deleteOldLogsCheckbox->setChecked(config.deleteOldLogs);
-    ui->deleteLogsOlderThan->setValue(config.deleteLogsOlderThan);
-    ui->warnWhenDeletingCheckBox->setChecked(config.warnWhenDeleting);
-    ui->warnWhenMoreThan->setValue(config.warnWhenMoreThan);
+    ui->autoLogMaxBytes->setValue(config.autoLogMaxBytes/1000000);
+    ui->notifyWhenLogsReachSize->setValue(config.notifyWhenLogsReachSize);
+    ui->notifyWhenLogsReachCheckBox->setChecked(config.notifyWhenLogsReach);
 }
 
 void AutoLogPage::selectLogLocationButtonClicked(int /*unused*/)
@@ -83,27 +73,17 @@ void AutoLogPage::autoLogCheckBoxChanged(int /*unused*/)
     setConfig().autoLog.autoLog = ui->autoLogCheckBox->isChecked();
 }
 
-void AutoLogPage::maxLogLinesChanged(int /*unused*/)
+void AutoLogPage::maxLogBytesChanged(int /*unused*/)
 {
-    setConfig().autoLog.autoLogMaxLines = ui->autoLogMaxLines->value();
+    setConfig().autoLog.autoLogMaxBytes = ui->autoLogMaxBytes->value() * 1000000; // Convert megabytes to bytes.
 }
 
-void AutoLogPage::deleteOldLogsCheckBoxChanged(int /*unused*/)
+void AutoLogPage::notifyWhenLogsReachCheckBoxChanged(int /*unused*/)
 {
-    setConfig().autoLog.deleteOldLogs = ui->deleteOldLogsCheckbox->isChecked();
+    setConfig().autoLog.notifyWhenLogsReach = ui->notifyWhenLogsReachCheckBox->isChecked();
 }
 
-void AutoLogPage::deleteLogsOlderThanChanged(int /*unused*/)
+void AutoLogPage::notifyWhenLogsReachSizeChanged(int /*unused*/)
 {
-    setConfig().autoLog.deleteLogsOlderThan = ui->deleteLogsOlderThan->value();
-}
-
-void AutoLogPage::warnWhenDeletingCheckBoxChanged(int /*unused*/)
-{
-    setConfig().autoLog.warnWhenDeleting = ui->warnWhenDeletingCheckBox->isChecked();
-}
-
-void AutoLogPage::warnWhenMoreThanChanged(int /*unused*/)
-{
-    setConfig().autoLog.warnWhenMoreThan = ui->warnWhenMoreThan->value();
+    setConfig().autoLog.notifyWhenLogsReachSize = ui->notifyWhenLogsReachSize->value();
 }

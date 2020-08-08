@@ -302,6 +302,8 @@ void Proxy::mudTerminatedConnection()
 
     m_serverState = ServerStateEnum::DISCONNECTED;
 
+    m_userTelnet->onRelayEchoMode(true);
+
     emit log("Proxy", "Mud terminated connection ...");
 
     sendToUser("\r\n\033[37;46mMUME closed the connection.\033[0m\r\n");
@@ -414,6 +416,8 @@ void Proxy::connectToMud()
 
 void Proxy::disconnectFromMud()
 {
+    m_userTelnet->onRelayEchoMode(true);
+
     switch (m_serverState) {
     case ServerStateEnum::CONNECTING:
         sendToUser("Error: You're still connecting.\r\n");

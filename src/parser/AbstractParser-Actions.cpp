@@ -31,7 +31,7 @@ void AbstractParser::initActionMap()
     auto addRegex = [&map](const std::string &match, const ActionCallback &callback) {
         assert(!match.empty());
         const char hint = [&match]() -> char {
-            if (match.length() > 2 && match[0] == '^' && match[1] != '\\')
+            if (match.length() > 2 && match[0] == '^' && match[1] != '\\' && match[1] != '(')
                 return match[1];
             return 0;
         }();
@@ -240,6 +240,29 @@ void AbstractParser::initActionMap()
     auto scout = [this](StringView /*view*/) { m_queue.enqueue(CommandEnum::SCOUT); };
     addStartsWith("You quietly scout", scout);
 
+    auto river = [this](StringView /*view*/) {
+        if (m_move != CommandEnum::NONE)
+            return;
+
+        // Predict our movement given what we know about flow flags
+        auto rs = RoomSelection(*m_mapData);
+        if (const Room *const r = rs.getRoom(getNextPosition())) {
+            for (auto i : ALL_EXITS_NESWUD) {
+                const Exit &e = r->exit(i);
+                const ExitFlags ef = e.getExitFlags();
+                if (!ef.isExit())
+                    continue;
+                if (ef.isFlow()) {
+                    // Override movement with the flow direction
+                    m_move = getCommand(i);
+                    return;
+                }
+            }
+        }
+    };
+    addStartsWith("You are swept away by the current.", river);       // Anduin River
+    addStartsWith("You are borne along by a strong current.", river); // General River
+
     /// Time
     addStartsWith("The current time is",
                   [this](StringView view) { m_mumeClock->parseClockTime(view.toQString()); });
@@ -247,7 +270,7 @@ void AbstractParser::initActionMap()
                 [this](StringView view) { m_mumeClock->parseMumeTime(view.toQString()); });
 
     /// Score
-    addRegex(R"(^\d+/\d+ hits(, \d+/\d+ mana,)? and \d+/\d+ moves.$)",
+    addRegex(R"(^(You have )?\d+/\d+ hits?(, \d+/\d+ mana,)? and \d+/\d+ move(ment point)?s.$)",
              [this](StringView view) { emit sendScoreLineEvent(view.toQByteArray()); });
 
     /// Search, reveal, and flush

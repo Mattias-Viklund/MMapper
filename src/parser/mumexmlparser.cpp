@@ -107,6 +107,8 @@ void MumeXmlParser::parse(const TelnetData &data)
     const QByteArray &line = data.line;
     m_lineToUser.clear();
     m_lineFlags.remove(LineFlagEnum::NONE);
+    if (!m_lineFlags.isSnoop())
+        m_snoopChar.reset();
 
     for (const char c : line) {
         if (m_readingTag) {
@@ -165,6 +167,11 @@ void MumeXmlParser::parse(const TelnetData &data)
             }
             QString tempStr = temp;
             tempStr = normalizeStringCopy(tempStr.trimmed());
+            if (m_snoopChar.has_value() && tempStr.length() > 3 && tempStr.at(0) == '&'
+                && tempStr.at(1) == m_snoopChar.value() && tempStr.at(2) == ' ') {
+                // Remove snoop prefix (i.e. "&J Exits: north.")
+                tempStr = tempStr.mid(3);
+            }
             parseMudCommands(tempStr);
         }
     }
@@ -173,7 +180,6 @@ void MumeXmlParser::parse(const TelnetData &data)
 bool MumeXmlParser::element(const QByteArray &line)
 {
     const int length = line.length();
-    const XmlModeEnum lastMode = m_xmlMode;
 
     switch (m_xmlMode) {
     case XmlModeEnum::NONE:
@@ -190,10 +196,10 @@ bool MumeXmlParser::element(const QByteArray &line)
                             sendToUser(::toQByteArrayLatin1(snoopToUser(os.str())));
                         }
                         m_promptFlags.reset(); // Don't trust god prompts
-                        m_queue.enqueue(m_move);
+                        if (m_move != CommandEnum::LOOK)
+                            m_queue.enqueue(m_move);
                         move();
                     }
-                    m_snoopChar.reset();
 
                 } else if (line.startsWith("/status")) {
                     m_lineFlags.remove(LineFlagEnum::STATUS);
@@ -422,11 +428,6 @@ bool MumeXmlParser::element(const QByteArray &line)
         m_lineToUser.append(lessThanChar).append(line).append(greaterThanChar);
     }
 
-    if (lastMode == XmlModeEnum::PROMPT) {
-        // Store prompts in case an internal command is executed
-        m_lastPrompt = m_lineToUser;
-    }
-
     return true;
 }
 
@@ -499,6 +500,14 @@ QByteArray MumeXmlParser::characters(QByteArray &ch)
         break;
 
     case XmlModeEnum::PROMPT:
+        // Store prompts in case an internal command is executed
+        m_lastPrompt = m_stringBuffer.toLatin1();
+        if (!getConfig().parser.removeXmlTags) {
+            m_lastPrompt.replace(ampersand, ampersandTemplate);
+            m_lastPrompt.replace(greaterThanChar, greaterThanTemplate);
+            m_lastPrompt.replace(lessThanChar, lessThanTemplate);
+            m_lastPrompt = "<prompt>" + m_lastPrompt + "</prompt>";
+        }
         sendPromptLineEvent(normalizeStringCopy(m_stringBuffer).toLatin1());
         if (m_descriptionReady) {
             if (!m_exitsReady && config.mumeNative.emulatedExits) {

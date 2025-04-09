@@ -97,6 +97,18 @@ UniqueMesh Functions::createTexturedBatch(const DrawModeEnum mode,
     return createTexturedMesh<TexturedMesh>(shared_from_this(), mode, batch, prog, texture);
 }
 
+UniqueMesh Functions::createWaterBatch(const DrawModeEnum mode,
+                                       const std::vector<TexVert> &batch,
+                                       const SharedMMTexture &texture)
+{
+    assert(static_cast<size_t>(mode) >= VERTS_PER_TRI);
+    const auto &prog = getShaderPrograms().getTexturedWaterShader();
+    auto res = createTexturedMesh<WaterMesh>(shared_from_this(), mode, batch, prog, texture);
+    prog->updateTime();
+    res.isWater = true;
+    return res;
+}
+
 UniqueMesh Functions::createColoredTexturedBatch(const DrawModeEnum mode,
                                                  const std::vector<ColoredTexVert> &batch,
                                                  const SharedMMTexture &texture)

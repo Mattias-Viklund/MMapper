@@ -147,7 +147,11 @@ private:
         return !m_vbo || m_numVerts == 0 || m_drawMode == DrawModeEnum::INVALID;
     }
 
-private:
+protected:
+    std::chrono::steady_clock::time_point start = std::chrono::high_resolution_clock::now();
+
+    virtual void update_shader() { return; }
+
     void virt_render(const GLRenderState &renderState) final
     {
         if (isEmpty())
@@ -158,13 +162,19 @@ private:
         const glm::mat4 mvp = m_functions.getProjectionMatrix();
         auto programUnbinder = m_program.bind();
         m_program.setUniforms(mvp, renderState.uniforms);
+
         RenderStateBinder renderStateBinder(m_functions, renderState);
         auto attribUnbinder = bindAttribs(); // mesh sets its own attributes
 
         m_functions.checkError();
 
         if (const std::optional<GLenum> &optMode = Functions::toGLenum(m_drawMode)) {
+            if (renderState.isWater) {
+                update_shader();
+                //WaterTexturedShader prog2 = m_program;
+            }
             m_functions.glDrawArrays(optMode.value(), 0, m_numVerts);
+
         } else {
             assert(false);
         }

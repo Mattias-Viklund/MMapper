@@ -29,6 +29,7 @@ AColorPlainShader::~AColorPlainShader() = default;
 UColorPlainShader::~UColorPlainShader() = default;
 AColorTexturedShader::~AColorTexturedShader() = default;
 UColorTexturedShader::~UColorTexturedShader() = default;
+WaterTexturedShader::~WaterTexturedShader() = default;
 FontShader::~FontShader() = default;
 PointShader::~PointShader() = default;
 
@@ -79,6 +80,13 @@ const std::shared_ptr<AColorTexturedShader> &ShaderPrograms::getTexturedAColorSh
 const std::shared_ptr<UColorTexturedShader> &ShaderPrograms::getTexturedUColorShader()
 {
     return getInitialized<UColorTexturedShader>(uTexturedShader, getFunctions(), "tex/ucolor");
+}
+
+const std::shared_ptr<WaterTexturedShader> &ShaderPrograms::getTexturedWaterShader()
+{
+    return getInitialized<WaterTexturedShader>(waterTexturedShader,
+                                               getFunctions(),
+                                               "tex/watercolor");
 }
 
 const std::shared_ptr<FontShader> &ShaderPrograms::getFontShader()

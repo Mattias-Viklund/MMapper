@@ -666,6 +666,8 @@ void MapCanvas::paintGL()
                             static_cast<double>(ctr.z)));
 
     font.render2dTextImmediate(text);
+
+    update();
 }
 
 void MapCanvas::paintSelectionArea()

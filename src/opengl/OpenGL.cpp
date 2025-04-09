@@ -96,6 +96,12 @@ UniqueMesh OpenGL::createTexturedQuadBatch(const std::vector<TexVert> &batch,
     return getFunctions().createTexturedBatch(DrawModeEnum::QUADS, batch, texture);
 }
 
+UniqueMesh OpenGL::createWaterBatch(const std::vector<TexVert> &batch,
+                                    const SharedMMTexture &texture)
+{
+    return getFunctions().createWaterBatch(DrawModeEnum::QUADS, batch, texture);
+}
+
 UniqueMesh OpenGL::createColoredTexturedQuadBatch(const std::vector<ColoredTexVert> &batch,
                                                   const SharedMMTexture &texture)
 {

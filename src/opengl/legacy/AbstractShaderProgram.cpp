@@ -172,6 +172,33 @@ void AbstractShaderProgram::setTexture(const char *const name, const int texture
     setUniform1iv(uFontTextureLoc, 1, &textureUnit);
 }
 
+void AbstractShaderProgram::setVec4(const char *const name, const glm::vec4 val)
+{
+    const auto location = getUniformLocation(name);
+    if (location != INVALID_UNIFORM_LOCATION) {
+        auto functions = m_functions.lock();
+        deref(functions).glUniform4fv(location, 1, glm::value_ptr(val));
+    }
+}
+
+void AbstractShaderProgram::setFloat(const char *const name, const float val)
+{
+    const auto location = getUniformLocation(name);
+    if (location != INVALID_UNIFORM_LOCATION) {
+        const float fVal = val;
+        setUniform1fv(location, 1, &fVal);
+    }
+}
+
+void AbstractShaderProgram::setInteger(const char *const name, const int val)
+{
+    const auto location = getUniformLocation(name);
+    if (location != INVALID_UNIFORM_LOCATION) {
+        const int iVal = val;
+        setUniform1iv(location, 1, &iVal);
+    }
+}
+
 void AbstractShaderProgram::setViewport(const char *const name, const Viewport &input_viewport)
 {
     const glm::ivec4 viewport{input_viewport.offset, input_viewport.size};

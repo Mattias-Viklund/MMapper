@@ -148,6 +148,7 @@ struct NODISCARD GLRenderState final
 
     // glLineWidth() + { glEnable(LINE_STIPPLE) + glLineStipple() }
     LineParams lineParams;
+    bool isWater = false;
 
     using Textures = MMapper::Array<SharedMMTexture, 2>;
     struct NODISCARD Uniforms final
@@ -213,6 +214,13 @@ struct NODISCARD GLRenderState final
     {
         GLRenderState copy = *this;
         copy.uniforms.textures = Textures{new_texture, nullptr};
+        return copy;
+    }
+
+    NODISCARD GLRenderState withWater() const
+    {
+        GLRenderState copy = *this;
+        copy.isWater = true;
         return copy;
     }
 };
@@ -306,6 +314,7 @@ public:
     ~UniqueMesh() = default;
     DEFAULT_MOVES_DELETE_COPIES(UniqueMesh);
 
+    bool isWater = false;
     void render(const GLRenderState &rs) { deref(m_mesh).render(rs); }
 };
 
@@ -323,7 +332,11 @@ public:
     void render(const GLRenderState &rs)
     {
         for (auto &mesh : m_meshes) {
-            mesh.render(rs);
+            if (mesh.isWater) {
+                mesh.render(GLRenderState().withDepthFunction(DepthFunctionEnum::LESS).withWater());
+            } else {
+                mesh.render(rs);
+            }
         }
     }
 };

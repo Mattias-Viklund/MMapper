@@ -74,7 +74,8 @@ public:
                                                  const SharedMMTexture &texture);
     NODISCARD UniqueMesh createColoredTexturedQuadBatch(const std::vector<ColoredTexVert> &verts,
                                                         const SharedMMTexture &texture);
-
+    NODISCARD UniqueMesh createWaterBatch(const std::vector<TexVert> &verts,
+                                          const SharedMMTexture &texture);
     NODISCARD UniqueMesh createFontMesh(const SharedMMTexture &texture,
                                         DrawModeEnum mode,
                                         const std::vector<FontVert3d> &batch);

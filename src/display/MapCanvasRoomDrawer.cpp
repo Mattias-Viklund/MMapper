@@ -219,6 +219,7 @@ public:
 };
 
 IRoomVisitorCallbacks::~IRoomVisitorCallbacks() = default;
+GLuint waterTextureId;
 
 static void visitRoom(const Room *const room,
                       const RoomIndex &roomIndex,
@@ -233,6 +234,7 @@ static void visitRoom(const Room *const room,
     const bool hasNoSundeath = room->getSundeathType() == RoomSundeathEnum::NO_SUNDEATH;
     const bool notRideable = room->getRidableType() == RoomRidableEnum::NOT_RIDABLE;
     const auto terrainAndTrail = getRoomTerrainAndTrail(textures, room);
+    const bool isWater = room->getTerrainType() == RoomTerrainEnum::WATER;
     const RoomMobFlags mf = room->getMobFlags();
     const RoomLoadFlags lf = room->getLoadFlags();
 
@@ -265,6 +267,10 @@ static void visitRoom(const Room *const room,
     // FIXME: This requires a map update.
     if (needsUpdate) {
         callbacks.visitOverlayTexture(room, textures.update->getRaw());
+    }
+
+    if (isWater) { // TODO: DUMB AND STUPID /M 2525 04 08
+        waterTextureId = terrainAndTrail.terrain->getRaw()->textureId();
     }
 
     const auto drawInFlow = [room, &roomIndex, &callbacks](const Exit &exit,
@@ -567,7 +573,16 @@ NODISCARD static UniqueMeshVector createSortedTexturedMeshes(OpenGL &gl,
 #undef EMIT
         }
 
-        result_meshes.emplace_back(gl.createTexturedQuadBatch(verts, rtex.tex->getShared()));
+        if (rtex.textureId() == 0) {
+            // TODO:
+        }
+
+        if (rtex.textureId() == waterTextureId) {
+            // TODO: DUMB, STUPID, SHOULDN'T BE HERE /M 2025 04 08
+            result_meshes.emplace_back(gl.createWaterBatch(verts, rtex.tex->getShared()));
+            auto ass = "breakpoint!";
+        } else
+            result_meshes.emplace_back(gl.createTexturedQuadBatch(verts, rtex.tex->getShared()));
     };
 
     ::foreach_texture(textures, lambda);

@@ -27,6 +27,8 @@ using RoomDesc = TaggedString<tags::RoomDescTag>;
 using RoomContents = TaggedString<tags::RoomContentsTag>;
 using RoomNote = TaggedString<tags::RoomNoteTag>;
 
+using RoomIsWater = bool;
+
 #define X_FOREACH_RoomTerrainEnum(X) \
     X(UNDEFINED) \
     X(INDOORS) \
@@ -53,7 +55,7 @@ static_assert(RoomTerrainEnum::UNDEFINED == RoomTerrainEnum{0});
 static constexpr const size_t NUM_ROOM_TERRAIN_TYPES = (X_FOREACH_RoomTerrainEnum(ADD));
 #undef ADD
 static_assert(RoomTerrainEnum::DEATHTRAP == RoomTerrainEnum{NUM_ROOM_TERRAIN_TYPES - 1});
-static_assert(NUM_ROOM_TERRAIN_TYPES == 16);
+static_assert(NUM_ROOM_TERRAIN_TYPES == 16); // 16 WITH WATER
 DEFINE_ENUM_COUNT(RoomTerrainEnum, NUM_ROOM_TERRAIN_TYPES)
 
 #define X_FOREACH_RoomAlignEnum(X) \

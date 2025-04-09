@@ -85,6 +85,7 @@ public:
     {}
 
 private:
+    GLuint m_waterTextureId;
     NODISCARD auto &getOpenGL() const { return m_opengl; }
 
 public:

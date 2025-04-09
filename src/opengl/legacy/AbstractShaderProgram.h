@@ -80,10 +80,13 @@ private:
     NODISCARD float getDevicePixelRatio() const;
 
 public:
+    void setVec4(const char *name, const glm::vec4);
     void setPointSize(float in_pointSize);
     void setColor(const char *name, const Color &color);
     void setMatrix(const char *name, const glm::mat4 &m);
     void setTexture(const char *name, int textureUnit);
+    void setFloat(const char *name, float val);
+    void setInteger(const char *name, int val);
     void setViewport(const char *name, const Viewport &input_viewport);
 };
 

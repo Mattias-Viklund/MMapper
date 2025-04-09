@@ -284,6 +284,9 @@ public:
     NODISCARD UniqueMesh createTexturedBatch(DrawModeEnum mode,
                                              const std::vector<TexVert> &batch,
                                              const SharedMMTexture &texture);
+    NODISCARD UniqueMesh createWaterBatch(DrawModeEnum mode,
+                                          const std::vector<TexVert> &batch,
+                                          const SharedMMTexture &texture);
     NODISCARD UniqueMesh createColoredTexturedBatch(DrawModeEnum mode,
                                                     const std::vector<ColoredTexVert> &batch,
                                                     const SharedMMTexture &texture);

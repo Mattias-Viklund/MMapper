@@ -234,6 +234,7 @@ void MapCanvas::initTextures()
     textures.room_sel_move_bad = loadTexture(getPixmapFilenameRaw("room-sel-move-bad.png"));
     textures.room_sel_move_good = loadTexture(getPixmapFilenameRaw("room-sel-move-good.png"));
     textures.update = loadTexture(getPixmapFilenameRaw("update0.png"));
+    //textures.water = loadTexture(getPixmapFilenameRaw("terrain-water.png"));
 
     {
         int priority = 0;

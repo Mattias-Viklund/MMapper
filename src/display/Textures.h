@@ -115,6 +115,7 @@ struct NODISCARD MapCanvasTextures final
     SharedMMTexture room_sel_move_bad;
     SharedMMTexture room_sel_move_good;
     SharedMMTexture update;
+    //SharedMMTexture water;
 
     template<typename Callback>
     void for_each(Callback &&callback)
@@ -141,6 +142,7 @@ struct NODISCARD MapCanvasTextures final
         callback(room_sel_move_bad);
         callback(room_sel_move_good);
         callback(update);
+        //callback(water);
     }
 
     void destroyAll();
